@@ -1,0 +1,23 @@
+resources:
+  jobs:
+    New_Job_Apr_19_2026_07_40_PM:
+      name: New Job Apr 19, 2026, 07:40 PM
+      tasks:
+        - task_key: task1
+          notebook_task:
+            notebook_path: /Workspace/Users/kartikstudies29@gmail.com/rohit_1lakh
+            source: WORKSPACE
+          job_cluster_key: task1_cluster
+      job_clusters:
+        - job_cluster_key: task1_cluster
+          new_cluster:
+            spark_version: 17.3.x-scala2.13
+            node_type_id: Standard_DC4as_v5
+            spark_env_vars:
+              PYSPARK_PYTHON: /databricks/python3/bin/python3
+            data_security_mode: DATA_SECURITY_MODE_STANDARD
+            runtime_engine: STANDARD
+            kind: CLASSIC_PREVIEW
+            is_single_node: true
+      queue:
+        enabled: true
