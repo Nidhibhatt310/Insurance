@@ -13,8 +13,8 @@ resources:
         - task_key: consume_task
           depends_on:
             - task_key: python_wheel_upload
-          notebook_task:
-            notebook_path: "../src/insurance/ingestion/kafka_consumer.py"
+          spark_python_task:
+            python_file: "../src/insurance/ingestion/kafka_consumer.py"
             source: WORKSPACE
           job_cluster_key: task1_cluster
       job_clusters:

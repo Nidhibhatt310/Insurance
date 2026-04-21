@@ -292,7 +292,7 @@ wheels = [
 ]
 
 [[package]]
-name = "insurance-dev"
+name = "insurance"
 version = "0.0.1"
 source = { editable = "." }
 dependencies = [
