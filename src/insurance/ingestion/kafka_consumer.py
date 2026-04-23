@@ -30,15 +30,14 @@ class consumeKafkaData:
         return df
 
     def write_to_bronze(self, df):
-        query = (
+        return (
             df.writeStream.format("delta")
             .option("checkpointLocation", f"{base_location}/bronze/{self.topic}")
             .queryName("kafka_bronze_stream")
             .outputMode("append")
             .trigger(availableNow=True)
-            .toTable(f"insurance_dev.bronze.{self.topic}")
+            .start(f"insurance_dev.bronze.{self.topic}")
         )
-        query.awaitTermination()
 
 
 claims = consumeKafkaData(topic="claims")
