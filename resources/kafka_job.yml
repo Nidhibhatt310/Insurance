@@ -15,7 +15,10 @@ resources:
             - task_key: python_wheel_upload
           spark_python_task:
             python_file: "../src/insurance/ingestion/kafka_consumer.py"
+            parameters:
+              - "${var.base_location}"
             source: WORKSPACE
+            
           job_cluster_key: task1_cluster
       job_clusters:
         - job_cluster_key: task1_cluster

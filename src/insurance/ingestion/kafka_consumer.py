@@ -1,19 +1,21 @@
+import sys
+base_location = sys.argv[1]
+
 class consumeKafkaData:
     
-    def __init__(self, spark, topic):
-        self.spark = spark
+    def __init__(self, topic):
         self.topic = topic
 
     def read_from_kafka(self):
         """
         reading the data from the given topic from Kafka        
         """
-        bootstrap_server = self.spark.conf.get("bootstrap_server")
-        kafka_key = self.spark.conf.get("kafka_key")
-        kafka_secret = self.spark.conf.get("kafka_secret")
+        bootstrap_server = spark.conf.get("bootstrap_server")
+        kafka_key = spark.conf.get("kafka_key")
+        kafka_secret = spark.conf.get("kafka_secret")
         JAAS_MODULE = 'org.apache.kafka.common.security.plain.PlainLoginModule'
         df = (
-            self.spark.readStream
+            spark.readStream
             .format("kafka")
             .option("kafka.bootstrap.servers", bootstrap_server)
             .option("kafka.security.protocol", "SASL_SSL")
@@ -25,7 +27,20 @@ class consumeKafkaData:
         )
         return df
 
+    def write_to_bronze(self, df):
+        return (
+            df.writeStream
+            .format('delta')
+            .option('checkpointLocation',f'{base_location}/bronze/{self.topic}')
+            .queryName("kafka_bronze_stream")
+            .outputMode('append')
+            .trigger(availableNow=True)
+            .toTable(f'insurance_dev.bronze.{self.topic}')
+        )
+
+
 
 claims = consumeKafkaData(topic="claims")
-read_claims = claims.read_from_kafka()
-read_claims.show()
+read_claims_df = claims.read_from_kafka()
+
+claims.write_to_bronze(read_claims_df)
