@@ -2,13 +2,16 @@ import sys
 base_location = sys.argv[1]
 
 class consumeKafkaData:
+<<<<<<< HEAD
     
+=======
+>>>>>>> 8a41b1d7a0a0deb5a8ea424a47919dc4dbeb7c0e
     def __init__(self, topic):
         self.topic = topic
 
     def read_from_kafka(self):
         """
-        reading the data from the given topic from Kafka        
+        reading the data from the given topic from Kafka
         """
         bootstrap_server = spark.conf.get("bootstrap_server")
         kafka_key = spark.conf.get("kafka_key")
@@ -20,7 +23,9 @@ class consumeKafkaData:
             .option("kafka.bootstrap.servers", bootstrap_server)
             .option("kafka.security.protocol", "SASL_SSL")
             .option("kafka.sasl.mechanism", "PLAIN")
-            .option("kafka.sasl.jaas.config", f'{JAAS_MODULE} required username="{kafka_key}" password="{kafka_secret}";' )
+            .option(
+                "kafka.sasl.jaas.config", f'{JAAS_MODULE} required username="{kafka_key}" password="{kafka_secret}";'
+            )
             .option("subscribe", self.topic)
             .option("startingOffsets", "earliest")
             .load()
@@ -41,6 +46,11 @@ class consumeKafkaData:
 
 
 claims = consumeKafkaData(topic="claims")
+<<<<<<< HEAD
 read_claims_df = claims.read_from_kafka()
 
 claims.write_to_bronze(read_claims_df)
+=======
+read_claims = claims.read_from_kafka()
+read_claims.show()
+>>>>>>> 8a41b1d7a0a0deb5a8ea424a47919dc4dbeb7c0e
