@@ -1,0 +1,18 @@
+variables:
+  Standard_DC4as_v5:
+    type: complex
+    default: 
+      cluster_name: ""
+      spark_version: 17.3.x-scala2.13
+      node_type_id: Standard_DC4as_v5
+      spark_conf:
+        # Syntax: {{secrets/scope_name/secret_name}}
+        bootstrap_server: "{{secrets/insurance-kafka-scope-dev/kafka-bootstrap-server-dev}}"
+        kafka_key: "{{secrets/insurance-kafka-scope-dev/kafka-key-dev}}"
+        kafka_secret: "{{secrets/insurance-kafka-scope-dev/kafka-secret-dev}}"
+      spark_env_vars:
+        PYSPARK_PYTHON: /databricks/python3/bin/python3
+      data_security_mode: DATA_SECURITY_MODE_STANDARD
+      runtime_engine: STANDARD
+      kind: CLASSIC_PREVIEW
+      is_single_node: true

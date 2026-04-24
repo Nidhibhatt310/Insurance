@@ -7,7 +7,7 @@ resources:
           python_wheel_task: 
             package_name: insurance
             entry_point: main
-          job_cluster_key: task1_cluster
+          existing_cluster_id: 0424-012115-2jbdui76
           libraries:
             - whl: ../dist/*.whl
         - task_key: consume_task
@@ -18,24 +18,7 @@ resources:
             parameters:
               - "${var.base_location}"
             source: WORKSPACE
-            
-          job_cluster_key: task1_cluster
-      job_clusters:
-        - job_cluster_key: task1_cluster
-          new_cluster:
-            spark_version: 17.3.x-scala2.13
-            node_type_id: Standard_DC4as_v5
-            spark_conf:
-              # Syntax: {{secrets/scope_name/secret_name}}
-              bootstrap_server: "{{secrets/insurance-kafka-scope-dev/kafka-bootstrap-server-dev}}"
-              kafka_key: "{{secrets/insurance-kafka-scope-dev/kafka-key-dev}}"
-              kafka_secret: "{{secrets/insurance-kafka-scope-dev/kafka-secret-dev}}"
-            spark_env_vars:
-              PYSPARK_PYTHON: /databricks/python3/bin/python3
-            data_security_mode: DATA_SECURITY_MODE_STANDARD
-            runtime_engine: STANDARD
-            kind: CLASSIC_PREVIEW
-            is_single_node: true
+          existing_cluster_id: 0424-012115-2jbdui76
       queue:
         enabled: true
     
