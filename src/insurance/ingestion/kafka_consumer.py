@@ -28,7 +28,7 @@ class consumeKafkaData:
                 "kafka.sasl.jaas.config", f'{JAAS_MODULE} required username="{kafka_key}" password="{kafka_secret}";'
             )
             .option("subscribe", self.topic)
-            .option("startingOffsets", "earliest")
+            .option("startingOffsets", "latest")
             .load()
         )
         return df
