@@ -7,12 +7,21 @@ bundle:
 include:
   - resources/*.yml
 
+artifacts:
+  insurance_whl:
+    type: whl
+    path: .
+    build: "pip install build && python -m build --wheel"
+
 # Variable declarations. These variables are assigned in the dev/prod targets below.
 variables:
   base_location:
     default: "abfss://insurance@nbadls1.dfs.core.windows.net"
   catalog:
     description: The catalog to use
+  env:
+    description: The environment to use (e.g., dev, qa, prod)
+    default: dev
   schema:
     description: The schema to use
   
@@ -33,6 +42,19 @@ targets:
       schema: dev
     presets:
       artifacts_dynamic_version: true
+  qa:
+    mode: development
+    workspace:
+      host: https://adb-7405613313220225.5.azuredatabricks.net
+      # We explicitly deploy to /Workspace/Users/kartikstudies29@gmail.com to make sure we only have a single copy.
+      root_path: /Workspace/Users/kartikstudies29@gmail.com/.bundle/${bundle.name}/${bundle.target}
+    variables:
+      env: qa
+      catalog: insurance
+      schema: qa
+    permissions:
+      - user_name: kartikstudies29@gmail.com
+        level: CAN_MANAGE
   prod:
     mode: production
     workspace:
@@ -40,6 +62,7 @@ targets:
       # We explicitly deploy to /Workspace/Users/kartikstudies29@gmail.com to make sure we only have a single copy.
       root_path: /Workspace/Users/kartikstudies29@gmail.com/.bundle/${bundle.name}/${bundle.target}
     variables:
+      env: prod
       catalog: insurance
       schema: prod
     permissions:

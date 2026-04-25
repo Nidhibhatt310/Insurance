@@ -4,11 +4,14 @@ resources:
       name: Kafka Consumer Job
       tasks:
         - task_key: kafka_pipeline
+          libraries:
+            - whl: ../dist/*.whl 
           python_wheel_task: 
             package_name: insurance
             entry_point: main
             parameters:
               - "${var.base_location}"
+              - "${var.env}"
           existing_cluster_id: 0424-012115-2jbdui76
       queue:
         enabled: true
