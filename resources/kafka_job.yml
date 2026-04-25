@@ -3,21 +3,12 @@ resources:
     my_kafka_job:
       name: Kafka Consumer Job
       tasks:
-        - task_key: python_wheel_upload
+        - task_key: kafka_pipeline
           python_wheel_task: 
             package_name: insurance
             entry_point: main
-          existing_cluster_id: 0424-012115-2jbdui76
-          libraries:
-            - whl: ../dist/*.whl
-        - task_key: consume_task
-          depends_on:
-            - task_key: python_wheel_upload
-          spark_python_task:
-            python_file: "../src/insurance/ingestion/kafka_consumer.py"
             parameters:
               - "${var.base_location}"
-            source: WORKSPACE
           existing_cluster_id: 0424-012115-2jbdui76
       queue:
         enabled: true

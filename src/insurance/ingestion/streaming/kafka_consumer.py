@@ -44,6 +44,7 @@ class consumeKafkaData:
         )
 
 
-claims = consumeKafkaData(topic="claims")
-read_claims = claims.read_from_kafka()
-claims.write_to_bronze(read_claims)
+def run_kafka_consumer(base_location: str, topic: str = "claims"):
+    consumer = consumeKafkaData(topic=topic)
+    df = consumer.read_from_kafka()
+    consumer.write_to_bronze(df)
