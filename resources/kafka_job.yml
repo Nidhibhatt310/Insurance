@@ -11,6 +11,7 @@ resources:
             entry_point: main
             parameters:
               - "${var.base_location}"
+              - "${var.env}"
           existing_cluster_id: 0424-012115-2jbdui76
       queue:
         enabled: true

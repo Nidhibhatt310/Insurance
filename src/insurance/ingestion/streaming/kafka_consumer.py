@@ -2,11 +2,12 @@ from pyspark.sql import SparkSession
 
 
 class ConsumeKafkaData:
-    def __init__(self, spark, dbutils, topic: str, base_location: str):
+    def __init__(self, spark, dbutils, topic: str, base_location: str, env: str):
         self.spark = spark
         self.dbutils = dbutils
         self.topic = topic
         self.base_location = base_location
+        self.env = env
 
     def read_from_kafka(self, bootstrap_server: str, kafka_key: str, kafka_secret: str):
         JAAS_MODULE = "org.apache.kafka.common.security.plain.PlainLoginModule"
@@ -32,11 +33,11 @@ class ConsumeKafkaData:
             .queryName("kafka_bronze_stream")
             .outputMode("append")
             .trigger(availableNow=True)
-            .toTable(f"insurance_dev.bronze.{self.topic}")
+            .toTable(f"insurance_{self.env}.bronze.{self.topic}")
         )
 
 
-def run_kafka_consumer(base_location: str, topic: str = "claims"):
+def run_kafka_consumer(base_location: str, env: str, topic: str):
     spark = SparkSession.builder.getOrCreate()
 
     # safe way to get dbutils inside a wheel
@@ -49,12 +50,7 @@ def run_kafka_consumer(base_location: str, topic: str = "claims"):
     kafka_key = dbutils.secrets.get("insurance-kafka-scope-dev", "kafka-key-dev")
     kafka_secret = dbutils.secrets.get("insurance-kafka-scope-dev", "kafka-secret-dev")
 
-    consumer = ConsumeKafkaData(
-        spark=spark,
-        dbutils=dbutils,
-        topic=topic,
-        base_location=base_location,
-    )
+    consumer = ConsumeKafkaData(spark=spark, dbutils=dbutils, topic=topic, base_location=base_location, env=env)
 
     df = consumer.read_from_kafka(bootstrap_server, kafka_key, kafka_secret)
     query = consumer.write_to_bronze(df)
