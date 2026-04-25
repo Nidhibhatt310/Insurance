@@ -2,6 +2,10 @@ import sys
 
 base_location = sys.argv[1]
 
+bootstrap_server = dbutils.secrets.get("insurance-kafka-scope-dev", "kafka-bootstrap-server-dev")
+kafka_key = dbutils.secrets.get("insurance-kafka-scope-dev", "kafka-key-dev")
+kafka_secret = dbutils.secrets.get("insurance-kafka-scope-dev", "kafka-secret-dev")
+
 
 class consumeKafkaData:
     def __init__(self, topic):
@@ -11,9 +15,9 @@ class consumeKafkaData:
         """
         reading the data from the given topic from Kafka
         """
-        bootstrap_server = spark.conf.get("bootstrap_server")
-        kafka_key = spark.conf.get("kafka_key")
-        kafka_secret = spark.conf.get("kafka_secret")
+        # bootstrap_server = spark.conf.get("bootstrap_server")
+        # kafka_key = spark.conf.get("kafka_key")
+        # kafka_secret = spark.conf.get("kafka_secret")
         JAAS_MODULE = "org.apache.kafka.common.security.plain.PlainLoginModule"
         df = (
             spark.readStream.format("kafka")
@@ -36,11 +40,11 @@ class consumeKafkaData:
             .queryName("kafka_bronze_stream")
             .outputMode("append")
             .trigger(availableNow=True)
-            .start(f"insurance_dev.bronze.{self.topic}")
+            .toTable(f"insurance_dev.bronze.{self.topic}")
         )
 
 
-claims = consumeKafkaData(topic="claims")
-read_claims_df = claims.read_from_kafka()
-
-claims.write_to_bronze(read_claims_df)
+def run_kafka_consumer(base_location: str, topic: str = "claims"):
+    consumer = consumeKafkaData(topic=topic)
+    df = consumer.read_from_kafka()
+    consumer.write_to_bronze(df)
