@@ -4,6 +4,8 @@ resources:
       name: Kafka Consumer Job
       tasks:
         - task_key: kafka_pipeline
+          libraries:
+            - whl: ../dist/*.whl 
           python_wheel_task: 
             package_name: insurance
             entry_point: main

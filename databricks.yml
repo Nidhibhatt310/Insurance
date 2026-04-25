@@ -7,6 +7,12 @@ bundle:
 include:
   - resources/*.yml
 
+artifacts:
+  insurance_whl:
+    type: whl
+    path: .
+    build: "pip install build && python -m build --wheel"
+
 # Variable declarations. These variables are assigned in the dev/prod targets below.
 variables:
   base_location:
