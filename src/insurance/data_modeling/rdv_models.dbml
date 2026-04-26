@@ -1,0 +1,111 @@
+// =========================
+// HUB TABLES
+// =========================
+
+Table HUB_CUSTOMER {
+  customer_id varchar [pk]
+}
+
+Table HUB_AGENT {
+  agent_id varchar [pk]
+}
+
+Table HUB_POLICY {
+  policy_id varchar [pk]
+}
+
+Table HUB_CLAIM {
+  claim_id varchar [pk]
+}
+
+Table HUB_BOOKING {
+  booking_id varchar [pk]
+}
+
+Table HUB_RISK {
+  risk_id varchar [pk]
+}
+
+
+// =========================
+// LINK TABLES
+// =========================
+
+Table LINK_POLICY {
+  policy_id varchar [ref: > HUB_POLICY.policy_id]
+  customer_id varchar [ref: > HUB_CUSTOMER.customer_id]
+  agent_id varchar [ref: > HUB_AGENT.agent_id]
+}
+
+Table LINK_CLAIM {
+  claim_id varchar [ref: > HUB_CLAIM.claim_id]
+  policy_id varchar [ref: > HUB_POLICY.policy_id]
+}
+
+Table LINK_BOOKING {
+  booking_id varchar [ref: > HUB_BOOKING.booking_id]
+  policy_id varchar [ref: > HUB_POLICY.policy_id]
+}
+
+Table LINK_RISK {
+  risk_id varchar [ref: > HUB_RISK.risk_id]
+  policy_id varchar [ref: > HUB_POLICY.policy_id]
+}
+
+
+// =========================
+// SATELLITE TABLES
+// =========================
+
+Table SAT_CUSTOMER {
+  customer_id varchar [ref: > HUB_CUSTOMER.customer_id]
+  name varchar
+  email varchar
+  phone varchar
+  address varchar
+  event_timestamp timestamp
+}
+
+Table SAT_AGENT {
+  agent_id varchar [ref: > HUB_AGENT.agent_id]
+  name varchar
+  region varchar
+  experience_years int
+  event_timestamp timestamp
+}
+
+Table SAT_POLICY {
+  policy_id varchar [ref: > HUB_POLICY.policy_id]
+  policy_type varchar
+  premium_amount double
+  start_date date
+  end_date date
+  status varchar
+  event_timestamp timestamp
+}
+
+Table SAT_CLAIM {
+  claim_id varchar [ref: > HUB_CLAIM.claim_id]
+  claim_amount double
+  claim_date date
+  claim_status varchar
+  fraud_flag boolean
+  event_timestamp timestamp
+}
+
+Table SAT_BOOKING {
+  booking_id varchar [ref: > HUB_BOOKING.booking_id]
+  transaction_type varchar
+  amount double
+  currency varchar
+  transaction_date timestamp
+  event_timestamp timestamp
+}
+
+Table SAT_RISK {
+  risk_id varchar [ref: > HUB_RISK.risk_id]
+  risk_score double
+  risk_category varchar
+  assessment_date date
+  event_timestamp timestamp
+}

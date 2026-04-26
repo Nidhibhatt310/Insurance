@@ -1,16 +1,16 @@
 resources:
   jobs:
-    kafka_to_bronze_job:
-      name: "Kafka → Bronze Ingestion"
+    rdv_to_gold_job:
+      name: "RDV → Gold (Star Schema)"
       tasks:
-        - task_key: kafka_to_bronze
+        - task_key: rdv_to_gold
           libraries:
             - whl: ../dist/*.whl
           python_wheel_task:
             package_name: insurance
             entry_point: main
             parameters:
-              - "kafka_to_bronze"
+              - "rdv_to_gold"
               - "${var.catalog}"
               - "${var.env}"
               - "${var.base_location}"

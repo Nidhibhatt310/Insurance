@@ -1,0 +1,56 @@
+kafka:
+  secrets_scope: insurance-kafka-scope-dev
+  bootstrap_server_key: kafka-bootstrap-server-dev
+  sasl_key: kafka-key-dev
+  sasl_secret_key: kafka-secret-dev
+
+layers:
+  bronze: bronze
+  flatten: flatten
+  rdv: rdv
+  gold: gold
+
+pipelines:
+  kafka_to_bronze:
+    enabled: true
+    trigger: availableNow
+    topics:
+      - agents
+      - booking_line
+      - claims
+      - customers
+      - policies
+      - risk_assessment
+
+  bronze_to_flatten:
+    enabled: true
+    trigger: availableNow
+    topics:
+      - agents
+      - booking_line
+      - claims
+      - customers
+      - policies
+      - risk_assessment
+
+  flatten_to_rdv:
+    enabled: true
+    trigger: batch
+    topics:
+      - agents
+      - booking_line
+      - claims
+      - customers
+      - policies
+      - risk_assessment
+
+  rdv_to_gold:
+    enabled: true
+    trigger: batch
+    schemas:
+      - dim_customer
+      - dim_agent
+      - dim_policy
+      - fact_claims
+      - fact_policies
+      - fact_bookings

@@ -1,0 +1,27 @@
+name: agents
+kafka_topic: agents
+source_type: streaming
+schema_class: agents
+
+bronze:
+  table: agents
+
+flatten:
+  table: agents
+
+rdv:
+  hub:
+    name: HUB_AGENT
+    table: hub_agent
+    business_key: agent_id
+    hash_key: agent_hash_key
+  satellites:
+    - name: SAT_AGENT
+      table: sat_agent
+      columns:
+        - name
+        - region
+        - experience_years
+        - event_type
+        - event_id
+  links: []

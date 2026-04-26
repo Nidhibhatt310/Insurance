@@ -1,15 +1,16 @@
 import sys
 from datetime import datetime, timezone
 
-from insurance.ingestion.streaming.kafka_consumer import KafkaBronzeIngester, get_kafka_creds
+from insurance.processing.standardize_data import BronzeFlattener
 from insurance.utils.audit import AuditLogger
 from insurance.utils.config import MetadataConfig
+from insurance.utils.dq_checker import DQChecker
 from insurance.utils.logger import get_logger
-from insurance.utils.spark_utils import get_dbutils, get_spark
+from insurance.utils.spark_utils import get_spark
 
 logger = get_logger(__name__)
 
-_PIPELINE = "kafka_to_bronze"
+_PIPELINE = "bronze_to_flatten"
 
 
 def run(catalog: str, env: str, base_location: str) -> None:
@@ -20,19 +21,18 @@ def run(catalog: str, env: str, base_location: str) -> None:
         config = MetadataConfig(catalog=catalog, env=env, base_location=base_location)
         spark = get_spark()
         audit = AuditLogger(spark=spark, catalog=catalog, env=env, pipeline=_PIPELINE)
-        dbutils = get_dbutils(spark)
+        dq = DQChecker(spark=spark, config=config, audit_logger=audit)
 
-        creds = get_kafka_creds(dbutils, config.get_kafka_secrets_config())
-        ingester = KafkaBronzeIngester(spark=spark, config=config, creds=creds)
-
+        flattener = BronzeFlattener(spark=spark, config=config)
         topics = config.get_pipeline_topics(_PIPELINE)
-        logger.info("Topics to ingest: %s", [t.name for t in topics])
+        logger.info("Topics to flatten: %s", [t.name for t in topics])
 
-        # Start all streams in parallel, then await + audit each
+        # Start all streams in parallel, then await + DQ + audit each
         started = []
         for topic in topics:
             start = datetime.now(timezone.utc)
-            q = ingester.ingest_topic(topic)
+            df = flattener.flatten_topic(topic, audit_logger=audit)
+            q = flattener.write_flatten(df, topic)
             started.append((topic, q, start))
 
         for topic, q, start in started:
@@ -40,19 +40,20 @@ def run(catalog: str, env: str, base_location: str) -> None:
                 q.awaitTermination()
                 progress = q.lastProgress or {}
                 records_in = int(progress.get("numInputRows", 0))
+                dq.run_topic_checks(config.flatten_table(topic), "flatten", topic.name)
                 audit.log_run(
-                    layer="bronze",
+                    layer="flatten",
                     topic=topic.name,
                     status="SUCCESS",
                     start_time=start,
                     records_in=records_in,
                     records_inserted=records_in,
-                    source_table=f"kafka:{topic.kafka_topic}",
-                    target_table=config.bronze_table(topic),
+                    source_table=config.bronze_table(topic),
+                    target_table=config.flatten_table(topic),
                 )
             except Exception as e:
                 audit.log_run(
-                    layer="bronze",
+                    layer="flatten",
                     topic=topic.name,
                     status="FAILED",
                     start_time=start,

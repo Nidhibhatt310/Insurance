@@ -1,0 +1,34 @@
+name: risk_assessment
+kafka_topic: risk_assessment
+source_type: streaming
+schema_class: risk_assessment
+
+bronze:
+  table: risk_assessment
+
+flatten:
+  table: risk_assessment
+
+rdv:
+  hub:
+    name: HUB_RISK
+    table: hub_risk
+    business_key: risk_id
+    hash_key: risk_hash_key
+  satellites:
+    - name: SAT_RISK
+      table: sat_risk
+      columns:
+        - risk_score
+        - risk_category
+        - assessment_date
+        - event_type
+        - event_id
+  links:
+    - name: LINK_RISK_POLICY
+      table: link_risk_policy
+      hash_key: risk_policy_link_hash_key
+      foreign_refs:
+        - hub_table: hub_policy
+          key: policy_id
+          hash_key: policy_hash_key

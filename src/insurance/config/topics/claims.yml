@@ -1,0 +1,35 @@
+name: claims
+kafka_topic: claims
+source_type: streaming
+schema_class: claims
+
+bronze:
+  table: claims
+
+flatten:
+  table: claims
+
+rdv:
+  hub:
+    name: HUB_CLAIM
+    table: hub_claim
+    business_key: claim_id
+    hash_key: claim_hash_key
+  satellites:
+    - name: SAT_CLAIM
+      table: sat_claim
+      columns:
+        - claim_amount
+        - claim_date
+        - claim_status
+        - fraud_flag
+        - event_type
+        - event_id
+  links:
+    - name: LINK_CLAIM_POLICY
+      table: link_claim_policy
+      hash_key: claim_policy_link_hash_key
+      foreign_refs:
+        - hub_table: hub_policy
+          key: policy_id
+          hash_key: policy_hash_key

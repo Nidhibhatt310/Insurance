@@ -1,0 +1,86 @@
+dimensions:
+  - name: DIM_CUSTOMER
+    table: dim_customer
+    source_hub: hub_customer
+    hub_biz_key: customer_id
+    hub_hash_key: customer_hash_key
+    source_satellite: sat_customer
+    columns:
+      - name
+      - email
+      - phone
+      - address
+
+  - name: DIM_AGENT
+    table: dim_agent
+    source_hub: hub_agent
+    hub_biz_key: agent_id
+    hub_hash_key: agent_hash_key
+    source_satellite: sat_agent
+    columns:
+      - name
+      - region
+      - experience_years
+
+  - name: DIM_POLICY
+    table: dim_policy
+    source_hub: hub_policy
+    hub_biz_key: policy_id
+    hub_hash_key: policy_hash_key
+    source_satellite: sat_policy
+    columns:
+      - policy_type
+      - premium_amount
+      - start_date
+      - end_date
+      - status
+
+facts:
+  - name: FACT_CLAIMS
+    table: fact_claims
+    grain: claim_id
+    source_hub: hub_claim
+    hub_biz_key: claim_id
+    hub_hash_key: claim_hash_key
+    source_satellite: sat_claim
+    measures:
+      - claim_amount
+    dimensions:
+      - dim_table: dim_policy
+        link_table: link_claim_policy
+        link_hash_key: claim_policy_link_hash_key
+        dim_hash_key: policy_hash_key
+
+  - name: FACT_POLICIES
+    table: fact_policies
+    grain: policy_id
+    source_hub: hub_policy
+    hub_biz_key: policy_id
+    hub_hash_key: policy_hash_key
+    source_satellite: sat_policy
+    measures:
+      - premium_amount
+    dimensions:
+      - dim_table: dim_customer
+        link_table: link_policy_customer_agent
+        link_hash_key: policy_customer_agent_link_hash_key
+        dim_hash_key: customer_hash_key
+      - dim_table: dim_agent
+        link_table: link_policy_customer_agent
+        link_hash_key: policy_customer_agent_link_hash_key
+        dim_hash_key: agent_hash_key
+
+  - name: FACT_BOOKINGS
+    table: fact_bookings
+    grain: booking_id
+    source_hub: hub_booking
+    hub_biz_key: booking_id
+    hub_hash_key: booking_hash_key
+    source_satellite: sat_booking
+    measures:
+      - amount
+    dimensions:
+      - dim_table: dim_policy
+        link_table: link_booking_policy
+        link_hash_key: booking_policy_link_hash_key
+        dim_hash_key: policy_hash_key

@@ -1,6 +1,6 @@
 import sys
 
-from insurance.processing.star_schema import StarSchemaBuilder
+from insurance.processing.rdv_builder import RDVBuilder
 from insurance.utils.audit import AuditLogger
 from insurance.utils.config import MetadataConfig
 from insurance.utils.dq_checker import DQChecker
@@ -9,7 +9,7 @@ from insurance.utils.spark_utils import get_spark
 
 logger = get_logger(__name__)
 
-_PIPELINE = "rdv_to_gold"
+_PIPELINE = "flatten_to_rdv"
 
 
 def run(catalog: str, env: str, base_location: str) -> None:
@@ -21,19 +21,14 @@ def run(catalog: str, env: str, base_location: str) -> None:
         spark = get_spark()
         audit = AuditLogger(spark=spark, catalog=catalog, env=env, pipeline=_PIPELINE)
         dq = DQChecker(spark=spark, config=config, audit_logger=audit)
-        gold_cfg = config.get_gold_schemas()
 
-        builder = StarSchemaBuilder(spark=spark, config=config, audit_logger=audit, dq_checker=dq)
+        rdv_builder = RDVBuilder(spark=spark, config=config, audit_logger=audit)
+        topics = config.get_pipeline_topics(_PIPELINE)
+        logger.info("Topics to process: %s", [t.name for t in topics])
 
-        dimensions = gold_cfg.get("dimensions", [])
-        logger.info("Building %d dimension(s)", len(dimensions))
-        for dim in dimensions:
-            builder.build_dimension(dim)
-
-        facts = gold_cfg.get("facts", [])
-        logger.info("Building %d fact table(s)", len(facts))
-        for fact in facts:
-            builder.build_fact(fact)
+        for topic in topics:
+            rdv_builder.process_topic(topic)
+            dq.run_rdv_ri_checks(topic.name)
 
         logger.info("PIPELINE COMPLETE: %s", _PIPELINE)
     except Exception:

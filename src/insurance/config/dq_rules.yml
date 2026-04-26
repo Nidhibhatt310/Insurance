@@ -1,0 +1,118 @@
+# Data quality rules evaluated after each layer write.
+# Add or adjust rules per topic without touching any code.
+#
+# Supported check types:
+#   null_rate              — fraction of nulls in column; passes if actual <= threshold
+#   row_count_min          — minimum row count; passes if count >= threshold
+#   row_count_max          — maximum row count; passes if count <= threshold
+#   referential_integrity  — orphaned foreign key rate in a link vs its hub;
+#                            passes if orphan_rate <= threshold
+#                            (use threshold > 0 to tolerate Kafka ordering lag)
+#
+# severity: CRITICAL (audit pass flag set to false) | WARNING (logged only)
+
+topics:
+  agents:
+    flatten:
+      - check: null_rate
+        column: agent_id
+        threshold: 0.0
+        severity: CRITICAL
+      - check: row_count_min
+        threshold: 1
+        severity: WARNING
+
+  booking_line:
+    flatten:
+      - check: null_rate
+        column: booking_id
+        threshold: 0.0
+        severity: CRITICAL
+      - check: row_count_min
+        threshold: 1
+        severity: WARNING
+    rdv:
+      - check: referential_integrity
+        link_table: rdv.link_booking_policy
+        column: policy_hash_key
+        ref_table: rdv.hub_policy
+        ref_column: policy_hash_key
+        threshold: 0.05      # tolerate up to 5% — Kafka ordering lag
+        severity: WARNING
+
+  claims:
+    flatten:
+      - check: null_rate
+        column: claim_id
+        threshold: 0.0
+        severity: CRITICAL
+      - check: row_count_min
+        threshold: 1
+        severity: WARNING
+    rdv:
+      - check: referential_integrity
+        link_table: rdv.link_claim_policy
+        column: policy_hash_key
+        ref_table: rdv.hub_policy
+        ref_column: policy_hash_key
+        threshold: 0.05
+        severity: WARNING
+
+  customers:
+    flatten:
+      - check: null_rate
+        column: customer_id
+        threshold: 0.0
+        severity: CRITICAL
+      - check: row_count_min
+        threshold: 1
+        severity: WARNING
+
+  policies:
+    flatten:
+      - check: null_rate
+        column: policy_id
+        threshold: 0.0
+        severity: CRITICAL
+      - check: row_count_min
+        threshold: 1
+        severity: WARNING
+    rdv:
+      - check: referential_integrity
+        link_table: rdv.link_policy_customer_agent
+        column: customer_hash_key
+        ref_table: rdv.hub_customer
+        ref_column: customer_hash_key
+        threshold: 0.05
+        severity: WARNING
+      - check: referential_integrity
+        link_table: rdv.link_policy_customer_agent
+        column: agent_hash_key
+        ref_table: rdv.hub_agent
+        ref_column: agent_hash_key
+        threshold: 0.05
+        severity: WARNING
+
+  risk_assessment:
+    flatten:
+      - check: null_rate
+        column: risk_id
+        threshold: 0.0
+        severity: CRITICAL
+      - check: row_count_min
+        threshold: 1
+        severity: WARNING
+    rdv:
+      - check: referential_integrity
+        link_table: rdv.link_risk_policy
+        column: policy_hash_key
+        ref_table: rdv.hub_policy
+        ref_column: policy_hash_key
+        threshold: 0.05
+        severity: WARNING
+
+# Applied to every gold dimension and fact table after creation
+gold:
+  - check: row_count_min
+    threshold: 1
+    severity: WARNING
