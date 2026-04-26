@@ -1,16 +1,16 @@
 resources:
   jobs:
-    kafka_to_bronze_job:
-      name: "Kafka → Bronze Ingestion"
+    flatten_to_rdv_job:
+      name: "Flatten → RDV"
       tasks:
-        - task_key: kafka_to_bronze
+        - task_key: flatten_to_rdv
           libraries:
             - whl: ../dist/*.whl
           python_wheel_task:
             package_name: insurance
             entry_point: main
             parameters:
-              - "kafka_to_bronze"
+              - "flatten_to_rdv"
               - "${var.catalog}"
               - "${var.env}"
               - "${var.base_location}"

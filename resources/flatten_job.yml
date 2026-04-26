@@ -1,16 +1,16 @@
 resources:
   jobs:
-    kafka_to_bronze_job:
-      name: "Kafka → Bronze Ingestion"
+    bronze_to_flatten_job:
+      name: "Bronze → Flatten"
       tasks:
-        - task_key: kafka_to_bronze
+        - task_key: bronze_to_flatten
           libraries:
             - whl: ../dist/*.whl
           python_wheel_task:
             package_name: insurance
             entry_point: main
             parameters:
-              - "kafka_to_bronze"
+              - "bronze_to_flatten"
               - "${var.catalog}"
               - "${var.env}"
               - "${var.base_location}"

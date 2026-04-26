@@ -1,0 +1,39 @@
+name: policies
+kafka_topic: policies
+source_type: streaming
+schema_class: policies
+
+bronze:
+  table: policies
+
+flatten:
+  table: policies
+
+rdv:
+  hub:
+    name: HUB_POLICY
+    table: hub_policy
+    business_key: policy_id
+    hash_key: policy_hash_key
+  satellites:
+    - name: SAT_POLICY
+      table: sat_policy
+      columns:
+        - policy_type
+        - premium_amount
+        - start_date
+        - end_date
+        - status
+        - event_type
+        - event_id
+  links:
+    - name: LINK_POLICY_CUSTOMER_AGENT
+      table: link_policy_customer_agent
+      hash_key: policy_customer_agent_link_hash_key
+      foreign_refs:
+        - hub_table: hub_customer
+          key: customer_id
+          hash_key: customer_hash_key
+        - hub_table: hub_agent
+          key: agent_id
+          hash_key: agent_hash_key

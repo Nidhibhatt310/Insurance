@@ -1,0 +1,28 @@
+name: customers
+kafka_topic: customers
+source_type: streaming
+schema_class: customers
+
+bronze:
+  table: customers
+
+flatten:
+  table: customers
+
+rdv:
+  hub:
+    name: HUB_CUSTOMER
+    table: hub_customer
+    business_key: customer_id
+    hash_key: customer_hash_key
+  satellites:
+    - name: SAT_CUSTOMER
+      table: sat_customer
+      columns:
+        - name
+        - email
+        - phone
+        - address
+        - event_type
+        - event_id
+  links: []

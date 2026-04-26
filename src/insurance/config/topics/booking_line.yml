@@ -1,0 +1,35 @@
+name: booking_line
+kafka_topic: booking_line
+source_type: streaming
+schema_class: booking_line
+
+bronze:
+  table: booking_line
+
+flatten:
+  table: booking_line
+
+rdv:
+  hub:
+    name: HUB_BOOKING
+    table: hub_booking
+    business_key: booking_id
+    hash_key: booking_hash_key
+  satellites:
+    - name: SAT_BOOKING
+      table: sat_booking
+      columns:
+        - transaction_type
+        - amount
+        - currency
+        - transaction_date
+        - event_type
+        - event_id
+  links:
+    - name: LINK_BOOKING_POLICY
+      table: link_booking_policy
+      hash_key: booking_policy_link_hash_key
+      foreign_refs:
+        - hub_table: hub_policy
+          key: policy_id
+          hash_key: policy_hash_key

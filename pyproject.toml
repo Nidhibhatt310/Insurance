@@ -4,7 +4,8 @@ version = "0.0.1"
 authors = [{ name = "kartikstudies29@gmail.com" }]
 requires-python = ">=3.12,<3.13"
 dependencies = [
-    "databricks-connect==17.3"
+    "databricks-connect==17.3",
+    "pyyaml>=6.0",
 ]
 
 [dependency-groups]
@@ -25,6 +26,8 @@ build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/insurance"]
+# Include YAML metadata files so they're available inside the deployed wheel
+artifacts = ["src/insurance/config/**/*.yml"]
 
 [tool.hatch.build.targets.wheel.sources]
 "src" = ""
